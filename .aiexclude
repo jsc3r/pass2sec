@@ -1,0 +1,5 @@
+# Compatibility with JetBrains AI clients using the legacy exclude filename.
+.pass2sec/
+.env
+.env.*
+*.key

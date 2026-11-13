@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Resolve the installed symlink so profiles and state stay in this project.
+launcher_path="${BASH_SOURCE[0]}"
+while [[ -L "$launcher_path" ]]; do
+    launcher_dir="$(cd -P -- "$(dirname -- "$launcher_path")" && pwd)"
+    launcher_path="$(readlink -- "$launcher_path")"
+    [[ "$launcher_path" = /* ]] || launcher_path="$launcher_dir/$launcher_path"
+done
+project_dir="$(cd -P -- "$(dirname -- "$launcher_path")" && pwd)"
+cd -- "$project_dir"
+
+if [[ -n "${JAVA_HOME:-}" ]]; then
+    java_binary="$JAVA_HOME/bin/java"
+elif command -v java >/dev/null 2>&1; then
+    java_binary="$(command -v java)"
+elif [[ -x "${HOME}/.local/opt/idea/jbr/bin/java" ]]; then
+    # Also support the locally installed IntelliJ JDK when Java is not on PATH.
+    export JAVA_HOME="${HOME}/.local/opt/idea/jbr"
+    java_binary="$JAVA_HOME/bin/java"
+else
+    echo "pass2sec: JDK 25 benötigt. JAVA_HOME setzen oder java in PATH aufnehmen." >&2
+    exit 1
+fi
+if [[ ! -x "$java_binary" ]]; then
+    echo "pass2sec: JAVA_HOME verweist nicht auf eine ausführbare Java-Installation." >&2
+    exit 1
+fi
+
+if [[ ! -f target/quarkus-app/quarkus-run.jar ]]; then
+    if [[ -x ./mvnw ]]; then
+        ./mvnw -B package
+    elif command -v mvn >/dev/null 2>&1; then
+        mvn -B package
+    else
+        echo "pass2sec: Noch kein Build vorhanden. Einmal mit JDK 25 und Maven 'mvn package' ausführen." >&2
+        exit 1
+    fi
+fi
+
+exec "$java_binary" -jar "$project_dir/target/quarkus-app/quarkus-run.jar" "$@"

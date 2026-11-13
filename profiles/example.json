@@ -1,0 +1,33 @@
+{
+  "name": "Beispieldienst – vor Verwendung anpassen",
+  "hosts": ["accounts.example.com"],
+  "aliasPrefix": "beispieldienst",
+  "updateUsername": false,
+  "passwordLength": 24,
+  "timeoutSeconds": 60,
+  "change": [
+    {"action": "NAVIGATE", "target": "https://accounts.example.com/login"},
+    {"action": "FILL", "target": "input[name=email]", "value": "${oldEmail}"},
+    {"action": "FILL", "target": "input[name=password]", "value": "${oldPassword}"},
+    {"action": "CLICK", "target": "button[type=submit]"},
+    {"action": "PAUSE", "target": "Falls nötig: 2FA im Browser abschließen"},
+    {"action": "NAVIGATE", "target": "https://accounts.example.com/settings/security"},
+    {"action": "FILL", "target": "input[name=new_email]", "value": "${newEmail}"},
+    {"action": "CLICK", "target": "button[data-action=change-email]"},
+    {"action": "PAUSE", "target": "Neue E-Mail-Adresse über die empfangene Bestätigung aktivieren"},
+    {"action": "FILL", "target": "input[name=current_password]", "value": "${oldPassword}"},
+    {"action": "FILL", "target": "input[name=new_password]", "value": "${newPassword}"},
+    {"action": "FILL", "target": "input[name=confirm_password]", "value": "${newPassword}"},
+    {"action": "CLICK", "target": "button[data-action=change-password]"},
+    {"action": "WAIT_VISIBLE", "target": "[data-testid=password-changed]"}
+  ],
+  "verify": [
+    {"action": "NAVIGATE", "target": "https://accounts.example.com/login"},
+    {"action": "FILL", "target": "input[name=email]", "value": "${newEmail}"},
+    {"action": "FILL", "target": "input[name=password]", "value": "${newPassword}"},
+    {"action": "CLICK", "target": "button[type=submit]"},
+    {"action": "PAUSE", "target": "Falls nötig: 2FA für den Kontroll-Login abschließen"},
+    {"action": "NAVIGATE", "target": "https://accounts.example.com/settings/security"},
+    {"action": "ASSERT_TEXT", "target": "[data-testid=primary-email]", "value": "${newEmail}"}
+  ]
+}

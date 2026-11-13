@@ -1,0 +1,5 @@
+# Local credentials and encrypted recovery state must not enter AI context.
+.pass2sec/
+.env
+.env.*
+*.key
